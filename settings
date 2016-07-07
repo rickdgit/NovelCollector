@@ -1,0 +1,29 @@
+# This file being used for set book related requests 
+#
+#
+#
+# == is not necessary
+=================
+$BookName:[银狐]
+!Website:[http://www.uukanshu.com]
+!IndexLink:[http://www.uukanshu.com/b/35179/]
+!StartCharNum:[-1]
+$EndingCharNum:[1]
+=================
+$BookName:[死亡高校]
+!Website:[http://www.uukanshu.com]
+!IndexLink:[http://www.uukanshu.com/b/33040/]
+!StartCharNum:[-1]
+$EndingCharNum:[-1]
+=================
+$BookName:[]
+!Website:[]
+!IndexLink:[]
+!StartCharNum:[]
+$EndingCharNum:[]
+=================
+$BookName:[]
+!Website:[]
+!IndexLink:[]
+!StartCharNum:[]
+$EndingCharNum:[]
