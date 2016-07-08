@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
-import urllib2,re
+import urllib2,re,smtplib,sys
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.MIMEBase import MIMEBase
+from email import encoders
 from lxml import etree,html
-from multiprocessing.dummy import Pool as ThreadPool 
 from lxml.html.clean import clean_html,Cleaner
-import sched,time
 from charpters import charpters
 from book import book
 from websiteProfile import websiteProfile
+from mails import mail 
+
+from multiprocessing.dummy import Pool as ThreadPool 
+import sched,time
 #TODO:
-#  2.Sending Email  - so that we could send Emails to Kindle
 #  3.MultiThreads for eachbook or multi Charpters
+#  5.Update plain txt secrets with netrc text file 
+#  6.Use DB instead of setting file
 
 #DONE
 #  1.Finish load Reqs - could read requests form file
+#  2.Sending Email  - so that we could send Emails to Kindle
 #  4.Figure out the getNextChar by page link garbash words
 
 
@@ -21,51 +29,41 @@ class Ser(object):
     def main(self):
         print("Server Started")
         #  self.loadReqs('aName')
-        books = self.loadReqs('settings')
+        books = self.loadReqs('settings','book')
         #PROCESS BOOK
-
         for abook in books:
             print(abook.bkname)
             self.processBook(abook)
             self.processResult(abook)
-        #  pool = ThreadPool(4)
-        #  rest = pool.map(self.processBook,books)
-        #  #  self.processResult(rest[0])
-        #  pool.map(self.processResult,rest)
-        #  pool.close()
-        #  print(time.time())
 
     #Load Setting files  then call processBook to get Book Infos - then processResult
-    def loadReqs(self,fileName):
+    def loadReqs(self,fileName,settingType):
         #Load Requests from a file.
         #Set requests to Book object
-        books = []
-        bk = [i for i in range(0,5)]
+        reqs = []
         try:
             f = open(fileName,"rb+")
+            #Readable
+            for i in re.findall(r'\$.+\n!.+\n!.+\n!.+\n\$.+',f.read(),re.M|re.I):
+                bk = []
+                i = ''.join([i,'\n'])
+                ops = re.findall(r'.*\n',i,re.M|re.I)
+                for r in ops:
+                    ress = re.search(r'\[.*\]',r) 
+                    #  bk = [res.group().replace("[","").replace("]","") if res.group()!= '[]' else '' for res in [re.search(r'\[.*\]',r) for r in ops]]
+                    if(ress.group() != '[]'):
+                        bk += [ress.group().replace("[","").replace("]","")]
+                if len(bk)>0:
+                    if settingType is 'book':
+                        reqs += [book(bk[0],bk[1],bk[2],int(bk[3]),int(bk[4]))]
+                    elif settingType is 'email':
+                        reqs += [mail(bk[0],bk[1],bk[2],bk[3],bk[4])]            
+                    else:
+                        print("")
+            f.close()
         except:
             print("ERROR: Setting file can not open")
-        # files = f.read()
-        for i in re.findall(r'\$.+\n!.+\n!.+\n!.+\n\$.+',f.read(),re.M|re.I):
-            a = 0
-            i = ''.join([i,'\n'])
-            ops = re.findall(r'.*\n',i,re.M|re.I)
-            for r in ops:
-                # ress = re.search(r'\[[a-zA-Z\u4e00-\u9fa5_]*\]',r) 
-                ress = re.search(r'\[.*\]',r) 
-                #  bk = [res.group().replace("[","").replace("]","") if res.group()!= '[]' else '' for res in [re.search(r'\[.*\]',r) for r in ops]]
-                if(ress.group() != '[]'):
-                    bk[a]= ress.group().replace("[","").replace("]","")
-                    print("==>>  %s <->  %s"%(bk[0],ress.group()))
-                    a+=1
-            #  if not bk:
-            books += [book(bk[0],bk[1],bk[2],int(bk[3]),int(bk[4]))]
-
-        print(len(books))
-        return books
-        
-        
-
+        return reqs
 
     def searchDB(self,bkName,charNumStart,charNumEnd):
         #use multi thread to search book for multiple website - choose one of them
@@ -258,12 +256,44 @@ class Ser(object):
             content = ''.join([content,x.toString().encode('utf-8')])
         fileName = ''.join([abook.bkname,'.txt'])
         self.saveToFile(fileName,content)
+        self.sendByMail(fileName)
 
     def sendByMail(self,fileName):
-        pass
+        amail = self.loadReqs('mail','email')[0]
+        sender = amail.sender
+        receiver = amail.receiver
+        msg = MIMEMultipart()
+        msg['From']=sender
+        msg['To']=receiver
+        msg['Subject']= amail.subject
+        body = amail.body
+        msg.attach(MIMEText(body,'plain'))
+        attachment = open(fileName,"rb")
+
+        part = MIMEBase('application','octet-stream')
+        part.set_payload((attachment).read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', "attachment; filename= %s" % fileName)
+        msg.attach(part)
+
+        try:
+            smtpObj = smtplib.SMTP('smtp-mail.outlook.com',587)
+            print("1 - Pass : open SMTP Connection")
+            smtpObj.starttls()
+            print("2 - Pass : Open SSL Connection")
+            smtpObj.login(sender,amail.passWD.decode('base64'))
+            print("3- Pass : Login")
+            smtpObj.sendmail(sender,receiver,msg.as_string())
+            print("4- Pass : Sent")
+            smtpObj.quit()
+            print("5- Pass : Quit Email sending Program ")
+        except:
+            print(sys.exc_info()[0])
+            print("EMAIL SENDING ERROR")
+            pass
 
     def saveToFile(self,fileName,content):
-        fw = open(fileName,"a")
+        fw = open(fileName,"w")
         fw.write(content)
         fw.close()
 
