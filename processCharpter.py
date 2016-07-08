@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+# coding: utf-8
 import urllib2,re,smtplib,sys
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
@@ -14,14 +15,16 @@ from mails import mail
 from multiprocessing.dummy import Pool as ThreadPool 
 import sched,time
 #TODO:
-#  3.MultiThreads for eachbook or multi Charpters
-#  5.Update plain txt secrets with netrc text file 
-#  6.Use DB instead of setting file
+#  Update brower header file
+#  MultiThreads for eachbook or multi Charpters
+#  Update plain txt secrets with netrc text file 
+#  Use DB instead of setting file
+#  Update Reading Format
 
 #DONE
-#  1.Finish load Reqs - could read requests form file
-#  2.Sending Email  - so that we could send Emails to Kindle
-#  4.Figure out the getNextChar by page link garbash words
+#  Finish load Reqs - could read requests form file
+#  Sending Email  - so that we could send Emails to Kindle
+#  Figure out the getNextChar by page link garbash words
 
 
 class Ser(object):
@@ -84,7 +87,7 @@ class Ser(object):
         return second
 
     def processBook(self,abook):
-        print("START: Process BOOK")
+        print("    START: Process BOOK")
         #get a book named abook
         #return no thing
         #Key part for this program
@@ -148,7 +151,7 @@ class Ser(object):
             print("Start %d -> setting %d ,end %d -> setting %d"%(start,abook.charNumStart,end,abook.charNumEnd))
 
             for x in range(start,end):
-                print(x)
+                print("Char INDEX : %d"%x)
                 if(profile.charOrder == 0):
                     #inorder
                     link = ''.join([profile.website,indexArr[x]])
@@ -156,19 +159,18 @@ class Ser(object):
                     link = ''.join([profile.website,indexArr[len(indexArr)-1-x]])
                 cha = charpters(profile,abook.website)
                 cha.CurrentCharLink = link
-                print('LINK %s'%link)
                 cha.htmlContent = self.processPage(link,cha.websiteProfile)
-                #  print("CONTENT: %s"%cha.htmlContent)
-                #  cha.charName = self.processCharTitle(cha)
+                cha.charName = self.processCharTitle(cha)
+                cha.charNum = str(x)
                 cha.text = self.processContent(cha)
                 abook.chars += [cha]
             print("Book Process by Index DONE")
-        print("FINISH: Process BOOK")
+        print("    FINISH: Process BOOK")
         return abook
         
 
     def processIndex(self,abook,model):
-        print("START: Process Index")
+        print("    START: Process Index")
         #process Indexs
         index = abook.indexlink
         profile = abook.chars[0].websiteProfile
@@ -185,18 +187,18 @@ class Ser(object):
                 res = ''.join([profile.website,s[abook.charNumStart]])
             else:
                 res = ''.join([profile.website,s[-1]])
-            print("FINISH: Process INDEX")
+            print("    FINISH: Process INDEX")
             return res
         else:
             #from charNumStart to charNumEnd
             print("Index arr:%d"%len(s))
-            print("FINISH: Process INDEX")
+            print("    FINISH: Process INDEX")
             return s
 
     def processPage(self,url,profile):
         page = None
         res = None
-        print("START: Process Page")
+        print("    START: Process Page")
         #grep webpage and process to text
         #Can not be charpter as input - used for both index process and concent grep
         req = urllib2.Request(url=url,headers={'User-Agent':profile})
@@ -209,7 +211,7 @@ class Ser(object):
         #      response = unicode(response,'GBK').encode('UTF-8')
         cleaner = Cleaner(page_structure=False,links=False,remove_tags=profile.remove_tags)
         page = cleaner.clean_html(response)
-        print("FINISH: Process Page")
+        print("    FINISH: Process Page")
         #  print(page)
         res = page
         del page
@@ -217,7 +219,7 @@ class Ser(object):
         
     def processContent(self,charpter):
         #get website content - text  and process out the text
-        print("START: Process CONTENT")
+        print("    START: Process CONTENT")
         element = etree.HTML(charpter.htmlContent)
         #  print(charpter.htmlContent)
         s = element.xpath(charpter.websiteProfile.textxPathKeyW)
@@ -226,36 +228,43 @@ class Ser(object):
             #  print(t)
             try:
                 #  text = ''.join([text,t.encode('ISO-8859-1')])
-                text = ''.join([text,t])
+                text = ''.join([text,t,'\n'])
             except:
                 pass
-        print("FINISH: Process CONTENT")
+        print("    FINISH: Process CONTENT")
         #  print("Test is %s\n"%text)
         return text
 
     def processnextCharLink(self,charpter):
-        print("START: Process NextCharLINK")
+        print("    START: Process NextCharLINK")
         #get html content of a char page, process it and figure out the next char link
         element = etree.HTML(charpter.htmlContent)
         x = element.xpath(charpter.websiteProfile.nextCharxPathKeyW)
-        print("FINISH: Process NextCharLINK")
+        print("    FINISH: Process NextCharLINK")
         return x[0]
+
+
     def processCharTitle(self,charpter):
-        print("START: Process CharTitle")
+        print("    START: Process CharTitle")
         #get html content of a char page, process it and figure out the next char link
         element = etree.HTML(charpter.htmlContent)
         x = element.xpath(charpter.websiteProfile.titlexPathKeyW)
         #  print(x[0].encode('ISO-8859-1'))
-        print("FINISH: Process CharTitle")
-        return x[0].encode('ISO-8859-1')
-
+        print("    FINISH: Process CharTitle")
+        return x[0]
 
     def processResult(self,abook):
         content = ''
+        #  for x in range(0,len(abook.chars)):
+        #      content = ''.join([content,x.toString().encode('utf-8')])
         for x in abook.chars:
-            content = ''.join([content,x.toString().encode('utf-8')])
-        fileName = ''.join([abook.bkname,'.txt'])
+            content = ''.join([content,x.toString()])
+        name = unicode(abook.bkname,'GBK')
+
+        fileName = ''.join([name,'.txt'])
+        #Save To File
         self.saveToFile(fileName,content)
+        #Send TO Mail
         self.sendByMail(fileName)
 
     def sendByMail(self,fileName):
@@ -282,11 +291,11 @@ class Ser(object):
             smtpObj.starttls()
             print("2 - Pass : Open SSL Connection")
             smtpObj.login(sender,amail.passWD.decode('base64'))
-            print("3- Pass : Login")
+            print("3 - Pass : Login")
             smtpObj.sendmail(sender,receiver,msg.as_string())
-            print("4- Pass : Sent")
+            print("4 - Pass : Sent")
             smtpObj.quit()
-            print("5- Pass : Quit Email sending Program ")
+            print("5 - Pass : Quit Email sending Program ")
         except:
             print(sys.exc_info()[0])
             print("EMAIL SENDING ERROR")
@@ -294,6 +303,7 @@ class Ser(object):
 
     def saveToFile(self,fileName,content):
         fw = open(fileName,"w")
+        print(content)
         fw.write(content)
         fw.close()
 

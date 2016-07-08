@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
 class charpters(object):
     def __init__(self,websiteProfile,link):
     #  def __init__(self,websiteProfile,link,CurrentCharLink,htmlContent,Nname,charNum,charName,indexLink,text,nextCharlink,PrevLink):
@@ -9,4 +11,8 @@ class charpters(object):
     def toFile(self,path,fileName):
         pass
     def toString(self):
-        return self.text
+        c = u"\u3002"
+        d = ''.join([c,'\n'])
+        e = u"\u201d"
+        f = ''.join([e,'\n'])
+        return ''.join([self.charNum,'--',self.charName,'\n',self.text]).replace(e,f).replace(c,d).encode('utf-8')
