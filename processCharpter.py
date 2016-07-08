@@ -8,11 +8,12 @@ from charpters import charpters
 from book import book
 from websiteProfile import websiteProfile
 #TODO:
-#  1.Finish load Reqs - could read requests form file
 #  2.Sending Email  - so that we could send Emails to Kindle
 #  3.MultiThreads for eachbook or multi Charpters
-#  4.Figure out the getNextChar by page link garbash words
 
+#DONE
+#  1.Finish load Reqs - could read requests form file
+#  4.Figure out the getNextChar by page link garbash words
 
 
 class Ser(object):
@@ -20,39 +21,11 @@ class Ser(object):
     def main(self):
         print("Server Started")
         #  self.loadReqs('aName')
-        s = sched.scheduler(time.time,time.sleep)
-        while True:
-            print("---")
-            s.enter(1,300,self.loadReqs,('settings',))
-            print(time.time())
-            s.run()
-            time.sleep(30)
-            print("===")
-
-    def loadReqs(self,fileName):
-        #Load Requests from a file.
-        #Set requests to Book object
-        bk = []
-        books = []
-        try:
-            f = open(fileName,"rb+")
-        except:
-            print("ERROR: Setting file can not open")
-        # files = f.read()
-        for i in re.findall(r'\$.+\n!.+\n!.+\n!.+\n\$.+',f.read(),re.M|re.I):
-            i = ''.join([i,'\n'])
-            ops = re.findall(r'.*\n',i,re.M|re.I)
-            for r in ops:
-                # ress = re.search(r'\[[a-zA-Z\u4e00-\u9fa5_]*\]',r) 
-                ress = re.search(r'\[.*\]',r) 
-                if(ress.group() != '[]'):
-                    bk += [ress.group().replace("[","").replace("]","")] 
-
-            books += [book(bk[0],bk[1],bk[2],int(bk[3]),int(bk[4]))]
-        print(len(books))
+        books = self.loadReqs('settings')
         #PROCESS BOOK
 
         for abook in books:
+            print(abook.bkname)
             self.processBook(abook)
             self.processResult(abook)
         #  pool = ThreadPool(4)
@@ -61,6 +34,35 @@ class Ser(object):
         #  pool.map(self.processResult,rest)
         #  pool.close()
         #  print(time.time())
+
+    #Load Setting files  then call processBook to get Book Infos - then processResult
+    def loadReqs(self,fileName):
+        #Load Requests from a file.
+        #Set requests to Book object
+        books = []
+        bk = [i for i in range(0,5)]
+        try:
+            f = open(fileName,"rb+")
+        except:
+            print("ERROR: Setting file can not open")
+        # files = f.read()
+        for i in re.findall(r'\$.+\n!.+\n!.+\n!.+\n\$.+',f.read(),re.M|re.I):
+            a = 0
+            i = ''.join([i,'\n'])
+            ops = re.findall(r'.*\n',i,re.M|re.I)
+            for r in ops:
+                # ress = re.search(r'\[[a-zA-Z\u4e00-\u9fa5_]*\]',r) 
+                ress = re.search(r'\[.*\]',r) 
+                #  bk = [res.group().replace("[","").replace("]","") if res.group()!= '[]' else '' for res in [re.search(r'\[.*\]',r) for r in ops]]
+                if(ress.group() != '[]'):
+                    bk[a]= ress.group().replace("[","").replace("]","")
+                    print("==>>  %s <->  %s"%(bk[0],ress.group()))
+                    a+=1
+            #  if not bk:
+            books += [book(bk[0],bk[1],bk[2],int(bk[3]),int(bk[4]))]
+
+        print(len(books))
+        return books
         
         
 
@@ -131,6 +133,8 @@ class Ser(object):
             #to target chars 
             indexArr = self.processIndex(abook,1)
             profile.IndexGBK = 0
+
+            #Process Page Range
             if(abook.charNumStart  ==-1):
                 #start Char # == -1 ---> from beginning 
                 #All to the end
@@ -143,7 +147,8 @@ class Ser(object):
                 end = len(indexArr)-1
             else:
                 end = abook.charNumEnd
-            print("Start %d setting %d ,end %d  setting %d"%(start,abook.charNumStart,end,abook.charNumEnd))
+            print("Start %d -> setting %d ,end %d -> setting %d"%(start,abook.charNumStart,end,abook.charNumEnd))
+
             for x in range(start,end):
                 print(x)
                 if(profile.charOrder == 0):
@@ -182,12 +187,13 @@ class Ser(object):
                 res = ''.join([profile.website,s[abook.charNumStart]])
             else:
                 res = ''.join([profile.website,s[-1]])
+            print("FINISH: Process INDEX")
             return res
         else:
             #from charNumStart to charNumEnd
-            print("arr:%d"%len(s))
+            print("Index arr:%d"%len(s))
+            print("FINISH: Process INDEX")
             return s
-        print("FINISH: Process INDEX")
 
     def processPage(self,url,profile):
         page = None
@@ -206,7 +212,7 @@ class Ser(object):
         cleaner = Cleaner(page_structure=False,links=False,remove_tags=profile.remove_tags)
         page = cleaner.clean_html(response)
         print("FINISH: Process Page")
-        print(page)
+        #  print(page)
         res = page
         del page
         return res
@@ -215,15 +221,18 @@ class Ser(object):
         #get website content - text  and process out the text
         print("START: Process CONTENT")
         element = etree.HTML(charpter.htmlContent)
+        #  print(charpter.htmlContent)
         s = element.xpath(charpter.websiteProfile.textxPathKeyW)
         text =''
         for t in s:
+            #  print(t)
             try:
-                text = ''.join([text,t.encode('ISO-8859-1')])
+                #  text = ''.join([text,t.encode('ISO-8859-1')])
+                text = ''.join([text,t])
             except:
                 pass
         print("FINISH: Process CONTENT")
-        print("Test is %s\n"%text)
+        #  print("Test is %s\n"%text)
         return text
 
     def processnextCharLink(self,charpter):
@@ -231,8 +240,6 @@ class Ser(object):
         #get html content of a char page, process it and figure out the next char link
         element = etree.HTML(charpter.htmlContent)
         x = element.xpath(charpter.websiteProfile.nextCharxPathKeyW)
-        #  print(x)
-        #  print(x[0])
         print("FINISH: Process NextCharLINK")
         return x[0]
     def processCharTitle(self,charpter):
@@ -240,29 +247,23 @@ class Ser(object):
         #get html content of a char page, process it and figure out the next char link
         element = etree.HTML(charpter.htmlContent)
         x = element.xpath(charpter.websiteProfile.titlexPathKeyW)
-        print(x[0].encode('ISO-8859-1'))
+        #  print(x[0].encode('ISO-8859-1'))
         print("FINISH: Process CharTitle")
         return x[0].encode('ISO-8859-1')
 
 
     def processResult(self,abook):
-        fw = open('ProcessRes',"a")
         content = ''
         for x in abook.chars:
-            print(x.charName)
-            print(x.toString())
-            print('\n')
-            fw.write(x.charName)
-            fw.write(x.toString())
-            content = ''.join([content,x.toString()])
-        self.saveToFile('saveToFile.txt',content)
-        fw.close()
+            content = ''.join([content,x.toString().encode('utf-8')])
+        fileName = ''.join([abook.bkname,'.txt'])
+        self.saveToFile(fileName,content)
 
     def sendByMail(self,fileName):
         pass
 
     def saveToFile(self,fileName,content):
-        fw = open(fileName,"wb")
+        fw = open(fileName,"a")
         fw.write(content)
         fw.close()
 
