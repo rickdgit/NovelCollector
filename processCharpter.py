@@ -15,8 +15,9 @@ from mails import mail
 from multiprocessing.dummy import Pool as ThreadPool 
 import sched,time
 #TODO:
-#  Update brower header file
+#  Update  Charpters - after each read 
 #  MultiThreads for eachbook or multi Charpters
+#  Update Load WebsiteProfile - add format check in loadReqs & len(bk)
 #  Update plain txt secrets with netrc text file 
 #  Use DB instead of setting file
 #  Update Reading Format
@@ -37,7 +38,7 @@ class Ser(object):
         for abook in books:
             print(abook.bkname)
             self.processBook(abook)
-            self.processResult(abook)
+        self.processResult(books)
 
     #Load Setting files  then call processBook to get Book Infos - then processResult
     def loadReqs(self,fileName,settingType):
@@ -192,6 +193,7 @@ class Ser(object):
         else:
             #from charNumStart to charNumEnd
             print("Index arr:%d"%len(s))
+            abook.indexNum = len(s)
             print("    FINISH: Process INDEX")
             return s
 
@@ -253,21 +255,29 @@ class Ser(object):
         print("    FINISH: Process CharTitle")
         return x[0]
 
-    def processResult(self,abook):
-        content = ''
-        #  for x in range(0,len(abook.chars)):
-        #      content = ''.join([content,x.toString().encode('utf-8')])
-        for x in abook.chars:
-            content = ''.join([content,x.toString()])
-        name = unicode(abook.bkname,'GBK')
-
-        fileName = ''.join([name,'.txt'])
-        #Save To File
-        self.saveToFile(fileName,content)
-        #Send TO Mail
-        self.sendByMail(fileName)
+    def processResult(self,books):
+        print("    START: Process Result")
+        i = 2;
+        for abook in books:
+            content = ''
+            if(abook.charNumEnd == -1 or abook.charNumStart < abook.charNumEnd  ):
+                for x in abook.chars:
+                    content = ''.join([content,x.toString()])
+                #  name = unicode(abook.bkname,'GBK').decode('utf-8')
+                fileName = ''.join([abook.bkname,'.txt'])
+                #Save To File
+                self.saveToFile(fileName,content)
+                #Send TO Mail
+                self.sendByMail(fileName)
+                #Update DB/File
+                self.updateSettings('settings',abook,i)
+                i += 1
+            else:
+                print("ERROR:Starting Char Num equals to Ending Char Num")
+        print("    FINISH: Process CharTitle")
 
     def sendByMail(self,fileName):
+        print("    START: Sending File By EMAIL")
         amail = self.loadReqs('mail','email')[0]
         sender = amail.sender
         receiver = amail.receiver
@@ -302,11 +312,26 @@ class Ser(object):
             pass
 
     def saveToFile(self,fileName,content):
+        print("    START: Save File")
         fw = open(fileName,"w")
         print(content)
         fw.write(content)
         fw.close()
+        print("    FINISH: Save File")
 
+    #Update settings file - such as update char #
+    def updateSettings(self,fileName,reqs,lineNum):
+        print("    START: UPDATE SETTING")
+        with open(fileName,'r') as file:
+            data = file.readlines()
+        if(reqs.charNumEnd == -1):
+            endNum =  reqs.indexNum
+        else:
+            endNum = reqs.charNumEnd
+        data[lineNum*6-3] = data[lineNum*6-3].replace(str(reqs.charNumStart),str(endNum))
+        with open(fileName,'w') as file:
+            file.writelines(data)
+        print("    FINISH: UPDATE SETTING ")
 
 def main():
     ser = Ser()

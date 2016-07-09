@@ -4,6 +4,7 @@ class book(object):
         self.bkname = bkname
         self.website = website
         self.indexlink = indexlink
+        self.indexNum = 0;
         self.charNumEnd = charNumEnd
         self.charNumStart = charNumStart
     def toString(self):
