@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # coding: utf-8
-import urllib2,re,smtplib,sys
+import urllib2,re,smtplib,sys,datetime,pypinyin
+from pypinyin import pinyin, lazy_pinyin
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
@@ -15,6 +16,7 @@ from mails import mail
 from multiprocessing.dummy import Pool as ThreadPool 
 import sched,time
 #TODO:
+#  Settings can't updated 
 #  Update  Charpters - after each read 
 #  MultiThreads for eachbook or multi Charpters
 #  Update Load WebsiteProfile - add format check in loadReqs & len(bk)
@@ -32,6 +34,7 @@ class Ser(object):
 
     def main(self):
         print("Server Started")
+	print(datetime.datetime.now())
         #  self.loadReqs('aName')
         books = self.loadReqs('settings','book')
         #PROCESS BOOK
@@ -46,7 +49,7 @@ class Ser(object):
         #Set requests to Book object
         reqs = []
         try:
-            f = open(fileName,"rb+")
+            f = open(fileName,"r+")
             #Readable
             for i in re.findall(r'\$.+\n!.+\n!.+\n!.+\n\$.+',f.read(),re.M|re.I):
                 bk = []
@@ -260,11 +263,14 @@ class Ser(object):
         i = 2;
         for abook in books:
             content = ''
-            if(abook.charNumEnd == -1 or abook.charNumStart < abook.charNumEnd  ):
+            if((abook.charNumEnd == -1 and abook.charNumStart < abook.indexNum) or abook.charNumStart < abook.charNumEnd  ):
                 for x in abook.chars:
                     content = ''.join([content,x.toString()])
-                #  name = unicode(abook.bkname,'GBK').decode('utf-8')
-                fileName = ''.join([abook.bkname,'.txt'])
+                bkname = (abook.bkname).decode("utf-8")#.encode('gbk')
+		py = lazy_pinyin(bkname)
+		name = reduce((lambda x,y : '-'.join([x,y])),py)
+                fileName = ''.join([name,str(abook.charNumStart),'-',str((abook.charNumEnd,abook.indexNum)[abook.charNumEnd == -1]),'.txt'])
+		print(fileName)
                 #Save To File
                 self.saveToFile(fileName,content)
                 #Send TO Mail
@@ -314,7 +320,7 @@ class Ser(object):
     def saveToFile(self,fileName,content):
         print("    START: Save File")
         fw = open(fileName,"w")
-        print(content)
+        #print(content)
         fw.write(content)
         fw.close()
         print("    FINISH: Save File")
@@ -322,15 +328,24 @@ class Ser(object):
     #Update settings file - such as update char #
     def updateSettings(self,fileName,reqs,lineNum):
         print("    START: UPDATE SETTING")
-        with open(fileName,'r') as file:
-            data = file.readlines()
+	time.sleep(1)
+	f = open(fileName,'r')
+        #with open(fileName,'r') as file:
+        #    data = file.readlines()
+	data = f.readlines()
+	f.close()
         if(reqs.charNumEnd == -1):
             endNum =  reqs.indexNum
         else:
             endNum = reqs.charNumEnd
         data[lineNum*6-3] = data[lineNum*6-3].replace(str(reqs.charNumStart),str(endNum))
-        with open(fileName,'w') as file:
-            file.writelines(data)
+	print(data[lineNum*6-3])
+	f = open(fileName,'w')
+	f.writelines(data)
+	f.close()
+        #with open(fileName,'w') as file:
+        #   file.writelines(data)
+	time.sleep(1)
         print("    FINISH: UPDATE SETTING ")
 
 def main():
