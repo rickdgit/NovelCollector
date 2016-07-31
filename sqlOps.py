@@ -37,7 +37,14 @@ class sqlOperation(object):
         #  self.cursor.execute(query)
 
     def updateElement(self,tbName,dic):
-        pass
+        atrbs = ""
+        for k,v in dic.iteritems():
+            atrbs += k+"="+v+","
+        atrbs = atrbs[:-1]
+        query = "update "+tbName+" set "+atrbs
+        print(query)
+
+
     def deleteElement(self):
         pass
     # def retrieveMultiElement(self,tbName,condition):
@@ -46,7 +53,7 @@ class sqlOperation(object):
     #     #  self.cursor.execute(query)
     def retrieveElement(self,atrbName,tbName,condition):
         query = "select "+atrbName+" from "+tbName
-        if condition != ""
+        if condition != "" :
             query += " where "+condition
         print(query)
     #OPs
@@ -81,24 +88,48 @@ class sqlOperation(object):
             condition +=  "CharNum > "+str(startatChar)
         retrieveElement(atrbName,'CharactersTable',condition)
 
-    def getBookByID(self,bookID,):
+    def getBookByID(self,bookID):
+        condition = "bookID = "+bookID
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
 
-        pass
-    def getBookByName(self):
-        pass
-    def getBookByAuthor(self):
-        pass
-    def getTaskByNumber(self):
-        pass
-    def getTaskByTitle(self):
-        pass
+    def getBookByName(self,bookName):
+        condition = "bookName = "+bookName
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
+
+    def getBookByAuthor(self,author):
+        condition = "author = "+author
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
+
+    def getTaskByNumber(self,number):
+        condition = "number = "+number
+        atrbName = "*"
+        tbName = "tasks"
+        retrieveElement(atrbName,tbName,condition)
+
+    def getTaskByTitle(self,title):
+        condition = "title = "+title
+        atrbName = "*"
+        tbName = "tasks"
+        retrieveElement(atrbName,tbName,condition)
+
     def updateBook(self,attr,values):
-        pass
+        tbName = "books"
+        dic = {}
+        for i in range(len(attr))
+            dic[attr[i]] = values[i]
+        updateElement(tbName,dic)
+
     def updateOneUserReadingChar(self,bookID,uid,endChar):
         #Update read chars for only one user
         dic = {}
         updateElement('readingProc',dic)
-        pass
+
     def updateUsersReadingChar(self,bookID,endChar):
         #Used for update all user for a book's reading stage for one book
         pass
