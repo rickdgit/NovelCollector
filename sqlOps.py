@@ -20,7 +20,7 @@ class sqlOperation(object):
     def testInit(self):
         try:
             #Check all table exists
-            #Or check first element in table 
+            #Or check first element in table
             self.cursor.execute("test Query lol")
         except :
             self.dbInit()
@@ -40,12 +40,15 @@ class sqlOperation(object):
         pass
     def deleteElement(self):
         pass
-    def retrieveMultiElement(self,tbName,condition):
-        query = "select * from "+tbName+"where "+ condition
+    # def retrieveMultiElement(self,tbName,condition):
+    #     query = "select * from "+tbName+"where "+ condition
+    #     print(query)
+    #     #  self.cursor.execute(query)
+    def retrieveElement(self,atrbName,tbName,condition):
+        query = "select "+atrbName+" from "+tbName
+        if condition != ""
+            query += " where "+condition
         print(query)
-        #  self.cursor.execute(query)
-    def retrieveElement(self):
-        pass
     #OPs
     def addBook(self,bkName,author,indexLink,totalCharNum):
         dic = {'bkName':bkName,'author':author,'indexLink':indexLink,'totalCharNum':totalCharNum}
@@ -68,16 +71,26 @@ class sqlOperation(object):
         insertElement('user',dic)
 
 
-    def getMultiChars(self,bookid,staratChar,endChar):
-        condition = "bookID = "+bookID+ " CharNum <= "+endChar + "AND CharNum > "+startatChar 
-        retrieveElement('CharactersTable',condition)
+    def getChars(self,atrbName,bookID,staratChar,endChar):
+        condition = "bookID = "+bookID
+        if endChar != -1 :
+            condition += "CharNum <= "+str(endChar)
+            if startChar != -1 :
+                condition += " AND "
+        if startChar != -1 :
+            condition +=  "CharNum > "+str(startatChar)
+        retrieveElement(atrbName,'CharactersTable',condition)
 
+    def getBookByID(self,bookID,):
 
-    def getSingleChars(self):
         pass
-    def getBook(self):
+    def getBookByName(self):
         pass
-    def getTask(self):
+    def getBookByAuthor(self):
+        pass
+    def getTaskByNumber(self):
+        pass
+    def getTaskByTitle(self):
         pass
     def updateBook(self,attr,values):
         pass
