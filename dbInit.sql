@@ -43,7 +43,7 @@ drop table if exists user;
 -- Each user need their own unique reading process
 create table user(
 	uid	integer	NOT NULL   AUTO_INCREMENT    primary key,
-	passwd	integer,
+	passwd	CHAR(64), --sha 256
 	email	varchar(100),
     defaultSendingFeq   integer default 24,    -- by hours -> 24 = sending update per day /
     defaultDayTime      Time default '08:00:00',
@@ -59,7 +59,7 @@ create table tasks(
     startChar   integer default -1,
     endChar integer default -1,
     SendingFeq  integer     default NULL,
-    DayTime     integer     default NULL,
+    DayTime     Time     default NULL,
     unique(taskID),
     PRIMARY KEY (taskID,uid,bookID),
 	FOREIGN key (bookID) REFERENCES books(bookID)ON DELETE CASCADE,
@@ -73,15 +73,15 @@ create trigger setTaskdefaultToUser
     for each row
 begin
         DECLARE defaultSending  integer;
-        DECLARE defaultDayTime  Time;
-        if (new.SendingFeq = NULL) then
+        DECLARE defaultDayTimes  Time;
+        if (new.SendingFeq is NULL) then
             select defaultSendingFeq into defaultSending from user
             where user.uid = new.uid;
             set new.SendingFeq = defaultSending;
         end if ;
-        if (new.SendingFeq = NULL) then
-            select defaultSendingFeq into defaultDayTime from user
+        if (new.DayTime is NULL) then
+            select defaultDayTime into defaultDayTimes from user
             where user.uid = new.uid;
-            set new.SendingFeq = defaultDayTime;
+            set new.DayTime = defaultDayTimes;
         end if ;
     end
