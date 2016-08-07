@@ -7,9 +7,13 @@ It wtitten by Python 2.7 and using lxml,urllib2,MySQL-Python,smtplib
 
 #TODOs
 Update MySQL query - sqlOps.py
+
 Refactor main processChapters.py - update main program
+
 Update search funtion that send request to website's search engine and process the result.
+
 Build interfaces to list contents to user.
+
 Build web interfaces to user.
 
 #Setup
@@ -39,7 +43,7 @@ For email settings, please store the related settings inside of mail file by fol
 	$PassWD:[Passwd that decode to base64]
 	=================
 	
-##Setup on *inx like paltform:
+##Setup on *inx like platform:
 we shall using crontab command to run the program periodically by
 
 	crontab -e 
