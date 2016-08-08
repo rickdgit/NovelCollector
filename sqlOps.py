@@ -57,26 +57,43 @@ class sqlOperation(object):
             query += " where "+condition
         print(query)
     #OPs
+
+#Book
     def addBook(self,bkName,author,indexLink,totalCharNum):
         dic = {'bkName':bkName,'author':author,'indexLink':indexLink,'totalCharNum':totalCharNum}
         insertElement('books',dic)
 
+    def getBookInfoByID(self,bookID):
+        condition = "bookID = "+bookID
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
+    def deleteBook(self):
+        pass
 
     def addChars(self,bookID,CharTitle,CharNum,CharContect):
         dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
         insertElement('CharactersTable',dic)
 
+    def getBookInfosByAuthor(self,author):
+        condition = "author = "+author
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
 
-    def addWebsetPerf(self,websiteAddr,charOrder,POST,encoding,removeTags,textXPathKey,titleXPathKey,indexXPathKey,nextCharXPathKey,searchXpath):
-        dic = {'websiteAddr':websiteAddr,'charOrder':charOrder,'POST':POST,'encoding':encoding,'removeTags':removeTags,'textXPathKey':textXPathKey,'titleXPathKey':titleXPathKey,'indexXPathKey':indexXPathKey,'nextCharXPathKey':nextCharXPathKey,'searchXpath':searchXpath}
-        insertElement('websitePerf',dic)
+    def updateBook(self,attr,values):
+        tbName = "books"
+        dic = {}
+        for i in range(len(attr))
+            dic[attr[i]] = values[i]
+        updateElement(tbName,dic)
 
 
-    def addTask(self):
-        #select the task periority
-        dic = {'bookID':bookID,'uid':uid,'bkName':bkName,'IndexLink':IndexLink,'currentChar':currentChar,'startChar':startChar,'endChar':endChar}
-        insertElement('user',dic)
+#Char related
 
+    def addChars(self,bookID,CharTitle,CharNum,CharContect):
+        dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
+        insertElement('CharactersTable',dic)
 
     def getChars(self,atrbName,bookID,staratChar,endChar):
         condition = "bookID = "+bookID
@@ -88,52 +105,71 @@ class sqlOperation(object):
             condition +=  "CharNum > "+str(startatChar)
         retrieveElement(atrbName,'CharactersTable',condition)
 
-    def getBookByID(self,bookID):
-        condition = "bookID = "+bookID
-        atrbName = "*"
-        tbName = "books"
-        retrieveElement(atrbName,tbName,condition)
+    def deleteChars(self):
+        pass
 
-    def getBookByName(self,bookName):
-        condition = "bookName = "+bookName
-        atrbName = "*"
-        tbName = "books"
-        retrieveElement(atrbName,tbName,condition)
+    # def getTaskByTitle(self,title):
+    #     condition = "title = "+title
+    #     atrbName = "*"
+    #     tbName = "tasks"
+    #     retrieveElement(atrbName,tbName,condition)
 
-    def getBookByAuthor(self,author):
-        condition = "author = "+author
-        atrbName = "*"
-        tbName = "books"
-        retrieveElement(atrbName,tbName,condition)
+#User related
+    def addUser(self):
+        pass
+    def updateUserPassWd(self):
+        pass
+    def updateUserEmail(self):
+        pass
 
-    def getTaskByNumber(self,number):
+#WebPerf related
+    def addWebsetPerf(self,websiteAddr,charOrder,POST,encoding,removeTags,textXPathKey,titleXPathKey,indexXPathKey,nextCharXPathKey,searchXpath):
+        dic = {'websiteAddr':websiteAddr,'charOrder':charOrder,'POST':POST,'encoding':encoding,'removeTags':removeTags,'textXPathKey':textXPathKey,'titleXPathKey':titleXPathKey,'indexXPathKey':indexXPathKey,'nextCharXPathKey':nextCharXPathKey,'searchXpath':searchXpath}
+        insertElement('websitePerf',dic)
+    def getAWebsitePerfByWebsiteAddr(self,WebsiteAddr):
+        #return a single websitePerf obj
+        pass
+    def getAllWebsitePerf(self):
+        #return a dic of websiteperfs objects
+        pass
+    def strToWebsitePerf(self,string):
+        #conver receiving string from db to a websiteperfs objects
+        pass
+
+#Task related
+    def addTask(self):
+        #select the task periority
+        dic = {'bookID':bookID,'uid':uid,'bkName':bkName,'IndexLink':IndexLink,'currentChar':currentChar,'startChar':startChar,'endChar':endChar}
+        insertElement('user',dic)
+
+    def getTaskByTaskID(self,number):
         condition = "number = "+number
         atrbName = "*"
         tbName = "tasks"
         retrieveElement(atrbName,tbName,condition)
 
-    def getTaskByTitle(self,title):
-        condition = "title = "+title
-        atrbName = "*"
-        tbName = "tasks"
-        retrieveElement(atrbName,tbName,condition)
-
-    def updateBook(self,attr,values):
-        tbName = "books"
-        dic = {}
-        for i in range(len(attr))
-            dic[attr[i]] = values[i]
-        updateElement(tbName,dic)
-
+    def getAUserAllTask(self):
+        pass
+    def getAUserTaskByBookID(self):
+        pass
     def updateOneUserReadingChar(self,bookID,uid,endChar):
         #Update read chars for only one user
         dic = {}
         updateElement('readingProc',dic)
 
-    def updateUsersReadingChar(self,bookID,endChar):
+    def updateAllUsersReadingChar(self,bookID,endChar):
         #Used for update all user for a book's reading stage for one book
         pass
-    #  def deleteBook(self):
-    #      pass
-    #  def deleteChars(self):
-    #      pass
+
+    def updateTaskStartCharForUserWithBookID(self,uid,bookID):
+        pass
+    def updateTaskStartCharForUserWithBookName(self,uid,bookName):
+        pass
+    def updateTaskEndCharForUserWithBookID(self,uid,bookID):
+        pass
+    def updateTaskEndCharForUserWithBookName(self,uid,bookName):
+        pass
+    def updateTaskSendingFeqForUserWithBookID(self,uid,bookID):
+        pass
+    def updateTaskSendingFeqForUserWithBookName(self,uid,bookName):
+        pass

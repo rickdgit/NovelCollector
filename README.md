@@ -1,4 +1,5 @@
 #Novel MetaSearchEngine
+<<<<<<< HEAD
 Novel MetaSearchEngine is a service that grep novels from websites' search Engine, store them in MySQL database  and present the novel with its sources to user. Beside, it comes with send by email service wich can be used for SendToKindle service provided by Amazon.
 
 Cooperate with crontab cmd in *inx system could check the update of novels periodically
@@ -26,6 +27,39 @@ Install relys by pip:
 Note: The following settings could be added manually by using MySQL client. However, for each time program runs, it will check the following files in order to update the database. 
 
 Store the novel relate settings in setting file by follow the format:
+=======
+Current Version: V0.1 
+
+Novel MetaSearchEngine is a service that grep novels from websites' search Engine, store them in MySQL database and present the novel with its sources to user. Beside, it comes with send by email service wich can be used for SendToKindle service provided by Amazon.
+
+It can be used to check the update of novels periodically
+
+Wtitten by Python 2.7 and using lxml,urllib2,pinyin,smtplib
+##TODOs
+~~Finish Crawler~~
+
+~~Fix encoding issue~~
+
+~~Update main program by add read settings~~
+
+~~Update main program by add send to email~~
+
+~~Update main program by add update settings~~
+
+##Setup
+Install relys by pip:
+
+	pip install pinyin
+
+##Usage:
+This version is running on CentOS 7 without any program.
+
+Note: For stable version(current master branch) implements a program that gathering novel charpters from an index page of a novel in specific websites. The beta version(MySql branch) comes with MySQL database support.
+
+For each time program runs, it will check and update following settings. All related settings are stored in file.
+
+Store the novel relate content in side of setting file by follow the format:
+>>>>>>> master
 	
 	$BookName:[BookName]
 	!Website:[Front page Link]
