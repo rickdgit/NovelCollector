@@ -28,6 +28,7 @@ Note: The following settings could be added manually by using MySQL client. Howe
 
 Store the novel relate settings in setting file by follow the format:
 =======
+
 Current Version: V0.1 
 
 Novel MetaSearchEngine is a service that grep novels from websites' search Engine, store them in MySQL database and present the novel with its sources to user. Beside, it comes with send by email service wich can be used for SendToKindle service provided by Amazon.

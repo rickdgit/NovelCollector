@@ -3,7 +3,7 @@ from sqlOps import *
 
 class TestSqlOps(unittest.TestCase):
     def test_dbConnection(selfself):
-        a = sqlOperation('159.203.0.194',12580,'test','tester','Test1ng!!!')
+        a = sqlOperation('localhost',3306,'test','tester','Test1ng!!!')
         a.testInit()
 
 

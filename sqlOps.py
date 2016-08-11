@@ -83,9 +83,17 @@ class sqlOperation(object):
         tbName = "books"
         return deleteElement(tbName,combineWhere(whereA,cmpOp,whereB))
 
+<<<<<<< Updated upstream
     def addChars(self,bookID,CharTitle,CharNum,CharContect):
         dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
         return insertElement('CharactersTable',dic)
+=======
+    def getBookInfoByName(self,bookName):
+        condition = "bookName = "+bookName
+        atrbName = "*"
+        tbName = "books"
+        retrieveElement(atrbName,tbName,condition)
+>>>>>>> Stashed changes
 
     def getBookInfosByAuthor(self,author):
         condition = "author = "+author
