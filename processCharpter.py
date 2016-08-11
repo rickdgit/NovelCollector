@@ -274,7 +274,7 @@ class Ser(object):
                 #Save To File
                 self.saveToFile(fileName,content)
                 #Send TO Mail
-                self.sendByMail(fileName)
+                #self.sendByMail(fileName)
                 #Update DB/File
                 self.updateSettings('settings',abook,i)
                 i += 1
