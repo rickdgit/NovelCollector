@@ -234,7 +234,7 @@ class sqlOperation(object):
     #helper methods
     def combineWhere(whereA,cmpOp,whereB):
         where = ""
-        if(whereA != NULL && cmpOp != NULL && whereB != NULL):
+        if(whereA != NULL and cmpOp != NULL and whereB != NULL):
             for i in range(len(whereA)):
                 where += whereA[i]+cmpOp[i]+whereB[i]
         return where
