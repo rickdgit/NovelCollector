@@ -1,9 +1,9 @@
 import MySQLdb
 class sqlOperation(object):
-    def __init__(self,dbHost,dbName,dbUid,dbPd):
+    def __init__(self,dbHost,dbPort,dbName,dbUid,dbPd):
         self.dbCon = self.cursor = ""
         try:
-            self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName)
+            self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName,port=dbPort)
             self.cursor = self.dbCon.cursor()
             self.cursor.execute("SELECT VERSION()")
             print(self.cursor.fetchone())
