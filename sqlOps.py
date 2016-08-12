@@ -3,7 +3,11 @@ class sqlOperation(object):
     def __init__(self,dbHost,dbPort,dbName,dbUid,dbPd):
         self.dbCon = self.cursor = ""
         try:
-            self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName,port=dbPort)
+            if(dbPort != 12580):
+        	self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName)
+                print(dbPort)
+            else:
+        	self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName,dbPost=dbPort)
             self.cursor = self.dbCon.cursor()
             self.cursor.execute("SELECT VERSION()")
             print(self.cursor.fetchone())
@@ -32,8 +36,8 @@ class sqlOperation(object):
             keys += v+","
         value = value[:-1]
         keys = keys[:-1]
-        query = "insert into "+tbName+"("+value+") values ("+keys+");"
-        print(query)
+        query = "insert into "+tbName+" ("+value+") values ("+keys+");"
+        print(query+"\n")
         return query
         #  self.cursor.execute(query)
 
@@ -45,7 +49,7 @@ class sqlOperation(object):
         query = "update "+tbName+" set "+atrbs
         if(condition != ""):
             query += " where "+condition
-        print(query)
+        print(query+"\n")
         return query
 
     def deleteElement(self,tbName,condition):
@@ -54,7 +58,7 @@ class sqlOperation(object):
             atrbs += k+","
         atrbs = atrbs[:-1]
         query = "delete from"+tbName+" where "+atrbs
-        print(query)
+        print(query+"\n")
         return query
     # def retrieveMultiElement(self,tbName,condition):
     #     query = "select * from "+tbName+"where "+ condition
@@ -64,7 +68,7 @@ class sqlOperation(object):
         query = "select "+atrbName+" from "+tbName
         if condition != "" :
             query += " where "+condition
-        print(query)
+        print(query+"\n")
         return query
     #OPs
 
@@ -82,18 +86,18 @@ class sqlOperation(object):
     def deleteBook(self,whereA,cmpOp,whereB):
         tbName = "books"
         return deleteElement(tbName,combineWhere(whereA,cmpOp,whereB))
-
-<<<<<<< Updated upstream
+#
+#<<<<<<< Updated upstream
     def addChars(self,bookID,CharTitle,CharNum,CharContect):
         dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
         return insertElement('CharactersTable',dic)
-=======
+#=======
     def getBookInfoByName(self,bookName):
         condition = "bookName = "+bookName
         atrbName = "*"
         tbName = "books"
         retrieveElement(atrbName,tbName,condition)
->>>>>>> Stashed changes
+#>>>>>>> Stashed changes
 
     def getBookInfosByAuthor(self,author):
         condition = "author = "+author
