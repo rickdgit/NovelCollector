@@ -3,9 +3,8 @@ class sqlOperation(object):
     def __init__(self,dbHost,dbPort,dbName,dbUid,dbPd):
         self.dbCon = self.cursor = ""
         try:
-            if(dbPort != 12580):
+            if(dbPort == 3306):
         	self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName)
-                print(dbPort)
             else:
         	self.dbCon = MySQLdb.connect(host=dbHost,user=dbUid,passwd=dbPd,db=dbName,dbPost=dbPort)
             self.cursor = self.dbCon.cursor()
@@ -25,7 +24,8 @@ class sqlOperation(object):
         try:
             #Check all table exists
             #Or check first element in table
-            self.cursor.execute("test Query lol")
+            #  self.cursor.execute("test Query lol")
+            pass
         except :
             self.dbInit()
     #CRUD
@@ -33,7 +33,7 @@ class sqlOperation(object):
         value = keys = ""
         for k,v in dic.iteritems():
             value += k+","
-            keys += +"'"+v+"',"
+            keys += "'"+str(v)+"',"
         value = value[:-1]
         keys = keys[:-1]
         query = "insert into "+tbName+" ("+value+") values ("+keys+");"
@@ -75,7 +75,7 @@ class sqlOperation(object):
 #Book
     def addBook(self,bkName,author,indexLink,totalCharNum):
         dic = {'bkName':bkName,'author':author,'indexLink':indexLink,'totalCharNum':totalCharNum}
-        return insertElement('books',dic)
+        return self.insertElement('books',dic)
 
     def getBookInfoByID(self,bookID):
         condition = "bookID = '"+bookID+"'"
@@ -111,7 +111,7 @@ class sqlOperation(object):
 
     def addChars(self,bookID,CharTitle,CharNum,CharContect):
         dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
-        return insertElement('CharactersTable',dic)
+        return self.insertElement('CharactersTable',dic)
 
     def getChars(self,atrbName,bookID,startChar,endChar):
         condition = "bookID = '"+bookID+"'"
@@ -240,7 +240,3 @@ class sqlOperation(object):
         return where
 
 
-query = ""
-testQuery = self.sqlOps.()
-errorMsg = '\nError: Wrong query generated when.\n   Test query: '+testQuery+'\nCorrect query: '+query+'\n'
-self.assertEqual(testQuery,query),errorMsg)
