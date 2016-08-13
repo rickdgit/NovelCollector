@@ -33,7 +33,7 @@ class sqlOperation(object):
         value = keys = ""
         for k,v in dic.iteritems():
             value += k+","
-            keys += v+","
+            keys += +"'"+v+"',"
         value = value[:-1]
         keys = keys[:-1]
         query = "insert into "+tbName+" ("+value+") values ("+keys+");"
@@ -44,7 +44,7 @@ class sqlOperation(object):
     def updateElement(self,tbName,dic,condition):
         atrbs = ""
         for k,v in dic.iteritems():
-            atrbs += k+"="+v+","
+            atrbs += k+"='"+v+"',"
         atrbs = atrbs[:-1]
         query = "update "+tbName+" set "+atrbs
         if(condition != ""):
@@ -78,7 +78,7 @@ class sqlOperation(object):
         return insertElement('books',dic)
 
     def getBookInfoByID(self,bookID):
-        condition = "bookID = "+bookID
+        condition = "bookID = '"+bookID+"'"
         atrbName = "*"
         tbName = "books"
         return retrieveElement(atrbName,tbName,condition)
@@ -86,21 +86,15 @@ class sqlOperation(object):
     def deleteBook(self,whereA,cmpOp,whereB):
         tbName = "books"
         return deleteElement(tbName,combineWhere(whereA,cmpOp,whereB))
-#
-#<<<<<<< Updated upstream
-    def addChars(self,bookID,CharTitle,CharNum,CharContect):
-        dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
-        return insertElement('CharactersTable',dic)
-#=======
+
     def getBookInfoByName(self,bookName):
-        condition = "bookName = "+bookName
+        condition = "bookName = '"+bookName+"'"
         atrbName = "*"
         tbName = "books"
         retrieveElement(atrbName,tbName,condition)
-#>>>>>>> Stashed changes
 
     def getBookInfosByAuthor(self,author):
-        condition = "author = "+author
+        condition = "author = '"+author+"'"
         atrbName = "*"
         tbName = "books"
         return retrieveElement(atrbName,tbName,condition)
@@ -119,14 +113,14 @@ class sqlOperation(object):
         dic = {'bookID':bookID,'CharNum':CharNum,'CharTitle':CharTitle,'CharContect':CharContect}
         return insertElement('CharactersTable',dic)
 
-    def getChars(self,atrbName,bookID,staratChar,endChar):
-        condition = "bookID = "+bookID
-        if endChar != -1 :
-            condition += "CharNum <= "+str(endChar)
-            if startChar != -1 :
-                condition += " AND "
-        if startChar != -1 :
-            condition +=  "CharNum > "+str(startatChar)
+    def getChars(self,atrbName,bookID,startChar,endChar):
+        condition = "bookID = '"+bookID+"'"
+        if endChar != "-1" :
+            condition += "and CharNum <= '"+str(endChar)+"'"
+            if startChar != "-1" :
+                condition += " and "
+        if startChar != "-1" :
+            condition +=  "CharNum > '"+str(startChar)+"'"
         return retrieveElement(atrbName,'CharactersTable',condition)
 
     def deleteChars(self,whereA,cmpOp,whereB):
@@ -201,12 +195,6 @@ class sqlOperation(object):
         tbName = "tasks"
         return retrieveElement(atrbName,tbName,condition)
 
-    def updateOneUserReadingChar(self,bookID,uid,endChar):
-        #Update read chars for only one user
-        tbName = "tasks"
-        dic = {'endChar':endChar}
-        return updateElement(tbName,dic,combineWhere(["uid","bookID"],["=","="],[uid,bookID]))
-
     def updateAllUsersReadingChar(self,bookID,endChar):
         #Used for update all user for a book's reading stage for one book
         tbName = "tasks"
@@ -248,5 +236,11 @@ class sqlOperation(object):
         where = ""
         if(whereA != NULL and cmpOp != NULL and whereB != NULL):
             for i in range(len(whereA)):
-                where += whereA[i]+cmpOp[i]+whereB[i]
+                where += whereA[i]+cmpOp[i]+"'"+whereB[i]+"'"
         return where
+
+
+query = ""
+testQuery = self.sqlOps.()
+errorMsg = '\nError: Wrong query generated when.\n   Test query: '+testQuery+'\nCorrect query: '+query+'\n'
+self.assertEqual(testQuery,query),errorMsg)
