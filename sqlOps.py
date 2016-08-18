@@ -28,37 +28,47 @@ class sqlOperation(object):
             pass
         except :
             self.dbInit()
+
+    #helper methods
+    def combineWhere(self,whereA,cmpOp,whereB):
+        where = ""
+        if(whereA != None and cmpOp != None and whereB != None and whereA != '' and cmpOp != '' and (cmpOp != 'isNull' and whereB != '')):
+            for i in range(0,len(whereA)):
+                where += whereA[i]+cmpOp[i]+"'"+whereB[i]+"', "
+        where = where[:-2]
+        return where
+
     #CRUD
     def insertElement(self,tbName,dic):
         value = keys = ""
         for k,v in dic.iteritems():
             value += k+","
             keys += "'"+str(v)+"',"
+            print(value)
+            print(keys)
         value = value[:-1]
         keys = keys[:-1]
-        query = "insert into "+tbName+" ("+value+") values ("+keys+");"
+        query = "insert into "+tbName+" ("+value+") values ("+keys+")"
         print(query+"\n")
+        self.cursor.execute(query)
         return query
-        #  self.cursor.execute(query)
 
     def updateElement(self,tbName,dic,condition):
         atrbs = ""
         for k,v in dic.iteritems():
-            atrbs += k+"='"+v+"',"
-        atrbs = atrbs[:-1]
-        query = "update "+tbName+" set "+atrbs
+            atrbs += k+" = '"+v+"', "
+        atrbs = atrbs[:-2]
+        query = "update "+tbName+" set "+atrbs+" "
         if(condition != ""):
-            query += " where "+condition
+            query += "where "+condition
         print(query+"\n")
+        self.cursor.execute(query)
         return query
 
-    def deleteElement(self,tbName,condition):
-        atrbs = ""
-        for k in condition.iteritems():
-            atrbs += k+","
-        atrbs = atrbs[:-1]
-        query = "delete from"+tbName+" where "+atrbs
+    def deleteElement(self,tbName,condition): 
+        query = "delete from "+tbName+" where "+condition
         print(query+"\n")
+        self.cursor.execute(query)
         return query
     # def retrieveMultiElement(self,tbName,condition):
     #     query = "select * from "+tbName+"where "+ condition
@@ -69,6 +79,7 @@ class sqlOperation(object):
         if condition != "" :
             query += " where "+condition
         print(query+"\n")
+        self.cursor.execute(query)
         return query
     #OPs
 
@@ -81,30 +92,30 @@ class sqlOperation(object):
         condition = "bookID = '"+bookID+"'"
         atrbName = "*"
         tbName = "books"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def deleteBook(self,whereA,cmpOp,whereB):
         tbName = "books"
-        return deleteElement(tbName,combineWhere(whereA,cmpOp,whereB))
+        return self.deleteElement(tbName,self.combineWhere(whereA,cmpOp,whereB))
 
     def getBookInfoByName(self,bookName):
-        condition = "bookName = '"+bookName+"'"
+        condition = "bkName = '"+bookName+"'"
         atrbName = "*"
         tbName = "books"
-        retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def getBookInfosByAuthor(self,author):
         condition = "author = '"+author+"'"
         atrbName = "*"
         tbName = "books"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def updateBook(self,attr,values,whereA,cmpOp,whereB):
         tbName = "books"
         dic = {}
         for i in range(len(attr)):
             dic[attr[i]] = values[i]
-        return updateElement(tbName,dic,combineWhere(whereA,cmpOp,whereB))
+        return self.updateElement(tbName,dic,self.combineWhere(whereA,cmpOp,whereB))
 
 
 #Char related
@@ -116,16 +127,16 @@ class sqlOperation(object):
     def getChars(self,atrbName,bookID,startChar,endChar):
         condition = "bookID = '"+bookID+"'"
         if endChar != "-1" :
-            condition += "and CharNum <= '"+str(endChar)+"'"
+            condition += " and CharNum <= '"+str(endChar)+"'"
             if startChar != "-1" :
                 condition += " and "
         if startChar != "-1" :
             condition +=  "CharNum > '"+str(startChar)+"'"
-        return retrieveElement(atrbName,'CharactersTable',condition)
+        return self.retrieveElement(atrbName,'CharactersTable',condition)
 
     def deleteChars(self,whereA,cmpOp,whereB):
         tbName = "CharactersTable"
-        return deleteElement(tbName,combineWhere(whereA,cmpOp,whereB))
+        return self.deleteElement(tbName,self.combineWhere(whereA,cmpOp,whereB))
 
     # def getTaskByTitle(self,title):
     #     condition = "title = "+title
@@ -135,108 +146,99 @@ class sqlOperation(object):
 
 #User related
     def addUser(self,uid,passwd,email):
-        dic = {'uid':uid,'passwd':passwd,'email':email}
-        return insertElement('user',dic)
+        dic = {'passwd':passwd,'email':email}
+        return self.insertElement('user',dic)
 
     def updateUserPassWd(self,value,whereA,cmpOp,whereB):
         tbName = "user"
-        dic = {'passWd':value}
-        return updateElement(tbName,dic,combineWhere(whereA,cmpOp,whereB))
+        dic = {'passwd':value}
+        return self.updateElement(tbName,dic,self.combineWhere(whereA,cmpOp,whereB))
 
     def updateUserEmail(self,value,whereA,cmpOp,whereB):
         tbName = "user"
         dic = {'email':value}
-        return updateElement(tbName,dic,combineWhere(whereA,cmpOp,whereB))
+        return self.updateElement(tbName,dic,self.combineWhere(whereA,cmpOp,whereB))
 
 #WebPerf related
     def addWebsetPerf(self,websiteAddr,charOrder,POST,encoding,removeTags,textXPathKey,titleXPathKey,indexXPathKey,nextCharXPathKey,searchXpath):
         dic = {'websiteAddr':websiteAddr,'charOrder':charOrder,'POST':POST,'encoding':encoding,'removeTags':removeTags,'textXPathKey':textXPathKey,'titleXPathKey':titleXPathKey,'indexXPathKey':indexXPathKey,'nextCharXPathKey':nextCharXPathKey,'searchXpath':searchXpath}
-        return insertElement('websitePerf',dic)
+        return self.insertElement('websitePerf',dic)
 
     def getAWebsitePerfByWebsiteAddr(self,websiteAddr):
         #return a single websitePerf obj
-        condition = "websiteAddr = "+websiteAddr
+        condition = "websiteAddr = '"+websiteAddr+"'"
         atrbName = "*"
         tbName = "websitePerf"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def getAllWebsitePerf(self):
         #return a dic of websiteperfs objects
         condition = ""
         atrbName = "*"
         tbName = "websitePerf"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def strToWebsitePerf(self,string):
         #conver receiving string from db to a websiteperfs objects
         pass
 
 #Task related
-    def addTask(self):
+    def addTask(self,bookID,uid,bkName,IndexLink,currentChar,startChar,endChar):
         #select the task periority
         dic = {'bookID':bookID,'uid':uid,'bkName':bkName,'IndexLink':IndexLink,'currentChar':currentChar,'startChar':startChar,'endChar':endChar}
-        return insertElement('user',dic)
+        return self.insertElement('tasks',dic)
 
     def getTaskByTaskID(self,number):
         condition = "number = "+number
         atrbName = "*"
         tbName = "tasks"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def getAUserAllTask(self,uid):
         condition = "uid = "+uid
         atrbName = "*"
         tbName = "tasks"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def getAUserTaskByBookID(self,uid,bookID):
-        condition = "uid = "+uid + "and bookID = "+bookID
+        condition = "uid = "+uid + " and bookID = "+bookID
         atrbName = "*"
         tbName = "tasks"
-        return retrieveElement(atrbName,tbName,condition)
+        return self.retrieveElement(atrbName,tbName,condition)
 
     def updateAllUsersReadingChar(self,bookID,endChar):
         #Used for update all user for a book's reading stage for one book
         tbName = "tasks"
         dic = {'endChar':endChar}
-        return updateElement(tbName,dic,combineWhere(["bookID"],["="],[bookID]))
+        return self.updateElement(tbName,dic,self.combineWhere(["bookID"],["="],[bookID]))
 
     def updateTaskStartCharForUserWithBookID(self,uid,bookID,startChar):
         tbName = "tasks"
         dic = {'startChar':startChar}
-        return updateElement(tbName,dic,combineWhere(["uid","bookID"],["=","="],[uid,bookID]))
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bookID"],[" = "," = "],[uid,bookID]))
 
     def updateTaskStartCharForUserWithBookName(self,uid,bookName,startChar):
         tbName = "tasks"
         dic = {'startChar':startChar}
-        return updateElement(tbName,dic,combineWhere(["uid","bookName"],["=","="],[uid,bookName]))
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bkName"],[" = "," = "],[uid,bookName]))
 
     def updateTaskEndCharForUserWithBookID(self,uid,bookID,endChar):
         tbName = "tasks"
         dic = {'endChar':endChar}
-        return updateElement(tbName,dic,combineWhere(["uid","bookID"],["=","="],[uid,bookID]))
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bookID"],[" = "," = "],[uid,bookID]))
 
     def updateTaskEndCharForUserWithBookName(self,uid,bookName,endChar):
         tbName = "tasks"
         dic = {'endChar':endChar}
-        return updateElement(tbName,dic,combineWhere(["uid","bookName"],["=","="],[uid,bookName]))
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bkName"],[" = "," = "],[uid,bookName]))
 
     def updateTaskSendingFeqForUserWithBookID(self,uid,bookID,SendingFeq):
         tbName = "tasks"
         dic = {'SendingFeq':SendingFeq}
-        return updateElement(tbName,dic,combineWhere(["uid","bookID"],["=","="],[uid,bookID]))
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bookID"],[" = "," = "],[uid,bookID]))
 
     def updateTaskSendingFeqForUserWithBookName(self,uid,bookName,SendingFeq):
         tbName = "tasks"
         dic = {'SendingFeq':SendingFeq}
-        return updateElement(tbName,dic,combineWhere(["uid","bookName"],["=","="],[uid,bookName]))
-
-    #helper methods
-    def combineWhere(whereA,cmpOp,whereB):
-        where = ""
-        if(whereA != NULL and cmpOp != NULL and whereB != NULL):
-            for i in range(len(whereA)):
-                where += whereA[i]+cmpOp[i]+"'"+whereB[i]+"'"
-        return where
-
+        return self.updateElement(tbName,dic,self.combineWhere(["uid","bkName"],[" = "," = "],[uid,bookName]))
 
